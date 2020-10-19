@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8">
+  <title></title>
+</head>
+<body>
+  <div class="barra">
+    <div class="nombredeusuario1">
+      Nombre de Usuario: <span id="user_name"></span>
+    </div>
+
+    <div class="puntos1">
+      Puntos: <span id="cuantospuntos"> </span>
+    </div>
+
+    <select id="categorySelect" name="categorias">
+      <option value="" selected disabled>Elegir</option>
+      <option value="generales">Generales</option>
+      <option value="ciencias">Ciencias</option>
+      <option value="geografia">Geografia</option>
+    </select>
+
+  </div>
+
+
+
+
+  <div class="pregunta">
+    Bienvenido al oasis!
+  </div>
+<div class="pregunta2">
+    <p>Elija una categoria</p>
+</div>
+
+  <div id="botones" class="controles">
+    <button class="verdadero button" type="button" name="true" value="true">Verdadero</button>
+    <button class="falso button" type="button" name="false" value="false">Falso</button>
+  </div>
+  <!-- <div class="verdadero">
+  VERDADERO
+</div>
+<div class="falso">
+FALSO
+</div> -->
+
+
+
+
+
+<script type="text/javascript">
+document.getElementById('user_name').innerHTML=prompt('Ingrese su nombre');
+document.getElementById('botones').style.display='none';
+var puntaje=0;
+var nombre_de_usuario;
+var ronda=0;
+var game_over=false;
+var categorySelect=document.querySelector('#categorySelect');
+var preguntas=[];
+
+var categorias ='';
+categorySelect.addEventListener('change', function(e){
+  document.querySelector(".pregunta2").style.display='none';
+  document.getElementById('botones').style.display='block';
+   categorias = e.target.value;
+  if (categorias == 'generales') {
+    preguntas =[
+      {pregunta:'Argentina, ¿Perdio la final del mundial de 2014?', respuesta:'true', img: 'liomessi.jpg'},
+      {pregunta:'¿Boca gano la Libertadores en 2018?', respuesta:'false', img: 'boca.jpg'},
+      {pregunta: '¿Todas las palabras agudas, llevan tìlde?', respuesta: 'false', img: 'palabras_agudas.png' },
+      {pregunta: '¿Egipto se encuentra al Noreste de Africa?', respuesta: 'true', img: 'egipto.jpg'},
+      {pregunta: '¿O3, es oxìgeno?', respuesta: 'false', img: 'oxigeno.jpg'},
+      {pregunta: '¿El koala es un oso?', respuesta: 'false', img: 'koala.jpg'},
+    ];
+  }
+  if (categorias == 'ciencias') {
+    preguntas =[
+      {pregunta:'¿Marte es el planeta mas cercano al sol?', respuesta:'false', img: '01274972_xl.jpg'},
+      {pregunta:'¿El cerébro es el organo más pesado?', respuesta:'false', img: 'cerebro.png'},
+      {pregunta: '¿Las bacterias son células procariotas?', respuesta: 'true', img: 'bacteria.jpg' },
+      {pregunta: '¿3,14 es numero pi?', respuesta: 'true', img: 'piiii.jpg'},
+      {pregunta: '¿La luna es un astro?', respuesta: 'true', img: 'superluna.jpg'},
+      {pregunta: '¿La phobofobia es la fobia a la filosofía?', respuesta: 'false', img:'phobofobia.jpg'},
+    ];
+  }
+  if (categorias == 'geografia') {
+    preguntas =[
+      {pregunta:'¿Rusia es el país más grande del mundo?', respuesta:'true', img: 'geo_4_rusia.jpg'},
+      {pregunta:'¿Argentina tiene 23 provincias?', respuesta:'true', img: 'geo-6-malvinas.jpg'},
+      {pregunta: '¿El caudal de un río, es la extension del mismo?', respuesta: 'false', img: 'geo-5-rio.jpg' },
+      {pregunta: '¿Las Malvinas son de Argentina?', respuesta: 'false', img: 'malvi.jpg'},
+      {pregunta: '¿Buenos Aires, tiene un clima semiárido?', respuesta: 'false', img: 'geo-7-bs-as.jpg'},
+      {pregunta: '¿Hay 5 océanos en el mundo?', respuesta: 'true', img: 'geo-1.jpg'},
+    ];
+  }
+  categorySelect.style.display='none';
+  mostrarPregunta();
+});
+
+
+
+function mostrarPregunta() {
+  document.querySelector('body').style.backgroundImage = "url("+ preguntas[ronda].img +")";
+  document.querySelector('.pregunta').innerHTML = preguntas[ronda].pregunta;
+}
+
+
+var controles = document.querySelector('.controles');
+controles.addEventListener("click", responderPregunta);
+
+function responderPregunta(event) {
+  var objetivo = event.target;
+  if (objetivo==controles || categorias=='') {
+    return;
+  }else {
+    if (preguntas[ronda].respuesta == objetivo.value) {//ok
+      puntaje+=200;
+    }else {//wrong
+      puntaje -=100;
+    }
+    ronda++;
+    if (ronda == preguntas.length) {
+      resetGame();
+      document.querySelector(".pregunta2").style.display='block';
+    }else{
+      mostrarPregunta();
+      document.querySelector('#cuantospuntos').innerHTML=puntaje
+    }
+  }
+}
+
+
+function resetGame() {
+  // console.log(categorySelect.remove(categorySelect.selectedIndex));
+  categorySelect.remove(categorySelect.selectedIndex)
+  ronda = 0;
+  categorias=''
+  categorySelect.style.display='block';
+  categorySelect.value='';
+  document.querySelector('body').style.backgroundImage = '';
+  document.querySelector('.pregunta').innerHTML = '';
+  return;
+}
+</script>
+</body>
+</html>

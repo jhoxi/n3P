@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creador de Laberintos DHS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/gruvbox-dark.min.css">
+    <style>
+        *{
+            padding:0;
+            margin:0;
+            box-sizing: border-box;
+        }
+        body{
+            font-family: sans-serif;
+        }
+        header{
+            position: sticky;
+            top:0;
+            background-color: rgba(27, 3, 3, 0.85);
+            width: 100%;
+            padding: 2vmin;
+            color: ivory;
+        }
+        main{
+            padding: 2vmin;
+        }
+        @media only screen and (min-width: 992px) {
+            main{
+                display:grid;
+                grid-template-columns: 1fr 1fr;
+                grid-gap: 2vmin;
+            }
+        }
+        section{
+            padding: 1.5vmin;
+            background: rgb(245, 203, 203);
+        }
+        section h2{
+            margin: 1vmin;
+            color:rgba(3, 29, 3, 0.938)
+        }
+
+        section h3{
+            margin: 1vmin;
+            color:rgba(3, 29, 3, 0.938);
+            font-size: 15px;
+        }
+        section p{
+            margin:  1.5vmin;
+        }
+        section ul{
+            padding-left: 4vmin;
+        }
+
+        aside{
+            display:none;
+        }
+
+        footer{
+            color: ivory;
+            background-color: black;
+            position: sticky;
+            bottom: 0;
+            width: 100%;
+            padding: 2vmin;
+        }
+        #opcionesLaberinto{
+            margin: 2vmin auto;
+            border: 3px solid rgb(90, 43, 43);
+            display: grid;
+            width: 75vmin;
+            height: 75vmin;
+            grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+        }
+        #opcionesLaberinto .fila-opciones{
+            width:100%;
+            height:100%;
+            /* border: 1px solid green; */
+            display:grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+        }
+
+        #opcionesLaberinto .celda-opciones{
+            width:100%;
+            height:100%;
+        }
+
+        #opcionesLaberinto select{
+            width:100%;
+            height:100%;
+            font-size: 3vmin;
+        }
+        #opcionesLaberinto option{
+            font-weight: bold;
+            background-color: white;
+            color: black;
+            font-size: 3vmin;
+        }
+        #opcionesLaberinto option[disabled="true"]{
+            font-style: italic;
+            font-weight: normal;
+        }
+
+        #opcionesLaberinto select.P{
+            background-color: rgb(51, 49, 49);
+            color:white;
+        }
+
+        #opcionesLaberinto select.C{
+            background-color: rgb(255, 255, 166);
+        }
+        #opcionesLaberinto select.E{
+            background-color: rgb(133, 14, 14);
+        }
+        #opcionesLaberinto select.S{
+            background-color:rgb(20, 92, 20);
+            color:white;
+        }
+        
+        #resultadoCodigo{
+            margin: 2vmin;
+            padding: 2vmin;
+            font-family: monospace;
+            color: white;
+            background: black;
+        }
+
+        #codigoGenerado{
+            max-height: 71vh;
+            overflow-y: scroll;
+        }
+
+        section button{
+            outline:none;
+            border:none;
+            padding: 15px;
+            display:block;
+            margin: 2vmin auto;
+            background: black;
+            color: ivory;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 7px;
+            transition: all .1s;
+        }
+        section button:hover{
+            background: rgb(41, 38, 38);
+            cursor: pointer;
+        }
+
+        section button:active{
+            background: black;
+        }
+
+        #mensajeCopia{
+            background: black;
+            color: ivory;
+            width: 60%;
+            padding: 10px;
+            margin: 1vmin auto;
+            transition: all 1.6s;
+            opacity: 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+        #mensajeCopia.oculto{
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Creador de Laberintos DHS</h1>
+    </header>
+    <main>
+        <section>
+            <h2>¡Crea un diseño único!</h2>
+            <p>Configura el diseño de tu laberinto eligiendo una de las opciones para cada casillero. Hay <i>realmente miles de billones</i> de combinaciones posibles.</p>
+            <h3>Opciones Posibles</h3>
+            <ul>
+                <li>P: Pared</li>
+                <li>C: Camino</li>
+                <li>E: Entrada</li>
+                <li>S: Salida</li>
+            </ul>
+
+            <div id="opcionesLaberinto"></div>
+            <h3>Requisitos</h3>
+            <ul>
+                <li>La entrada está <i>fija</i> en el segundo casillero.</li>
+                <li>Solo puede haber una única salida.</li>
+                <li>Los otros bordes del laberinto deben ser Paredes.</li>
+                <li>Tiene que haber al menos un camino contínuo desde la Entrada a la salida.</li>
+                <li>No se puede mover en diagonal.</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Resultado en Código</h2>
+            <p>Puedes copiar el código generado automáticamente con los datos validados para diseñar tu propio laberinto en Playground.</p>
+            <h3>Recuento Cantidad de Casilleros</h3>
+            <ul>
+                <li>P: Pared <span class="recuento" id="rp"></span></li>
+                <li>C: Camino <span class="recuento" id="rc"></span></li>
+                <li>E: Entrada <span class="recuento" id="re"></span></li>
+                <li>S: Salida <span class="recuento" id="rs"></span></li>
+            </ul>
+            <div id="resultadoCodigo">
+                <pre><code class="html" id="codigoGenerado"></code></pre>
+            </div>
+            <button onclick="copiarCodigo()">Copiar Todo</button>
+            <p id="mensajeCopia">Código copiado correctamente</p>
+        </section>
+    </main>
+    <footer>
+        <p>Desarrollado por Equipo Mentores Digital House Schools</p>
+    </footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+    <script type="text/javascript">
+        let haySalida = false;
+        let seleccionoSalida = false;
+        let ultimoCodigoGenerado = "";
+
+        let elemOpciones = document.getElementById("opcionesLaberinto");
+        
+        let elemSelect = document.createElement("SELECT");
+        let opcionesPosibles = ["C","P","S","E"];
+        for (let o = 0; o<opcionesPosibles.length; o++){
+            let elemOptSel = document.createElement("OPTION");
+            elemOptSel.innerHTML = opcionesPosibles[o];
+            elemOptSel.value = opcionesPosibles[o];
+            if (opcionesPosibles[o] == "E"){
+                elemOptSel.setAttribute("disabled","true");
+            }
+            elemSelect.appendChild(elemOptSel);
+        }
+        
+        for (let i = 0 ; i<10; i++){
+            let elemFilaOpc = document.createElement("DIV");
+            elemFilaOpc.classList.add("fila-opciones");
+            for (let j = 0; j<10; j++){
+                let elemCeldaOpc = document.createElement("DIV");
+                elemCeldaOpc.classList.add("celda-opciones");
+                let suSelect = elemSelect.cloneNode(true);
+                suSelect.addEventListener("change", actualizarCelda);
+                suSelect.addEventListener("focus", function(){seleccionoSalida = event.target.classList.contains("S")});
+                suSelect.value="P";
+                switch (i) {
+                    case 0:
+                        elemCeldaOpc.classList.add("celda-borde");
+                        elemCeldaOpc.classList.add("celda-borde-superior");
+                        suSelect.querySelector('option[value="C"]').setAttribute("disabled","true");
+                        break;
+                    case 9:
+                        elemCeldaOpc.classList.add("celda-borde");
+                        elemCeldaOpc.classList.add("celda-borde-inferior");
+                        suSelect.querySelector('option[value="C"]').setAttribute("disabled","true")
+                        break;
+                    default:
+                        if(j!=0 && j!=9){
+                            suSelect.querySelector('option[value="S"]').setAttribute("disabled","true")     
+                        }
+                }
+                switch(j){
+                    case 0:
+                        elemCeldaOpc.classList.add("celda-borde");
+                        elemCeldaOpc.classList.add("celda-borde-izquierdo");
+                        suSelect.querySelector('option[value="C"]').setAttribute("disabled","true")
+                        break;
+                    case 9:
+                        elemCeldaOpc.classList.add("celda-borde");
+                        elemCeldaOpc.classList.add("celda-borde-derecho");
+                        suSelect.querySelector('option[value="C"]').setAttribute("disabled","true")
+                        break;
+                    default:
+                        if(i!= 0 && i!=9){
+                            suSelect.querySelector('option[value="S"]').setAttribute("disabled","true");
+                        }
+                }
+                elemCeldaOpc.appendChild(suSelect);
+                elemFilaOpc.appendChild(elemCeldaOpc);
+            }
+            elemOpciones.appendChild(elemFilaOpc);
+        }
+        function actualizarCelda(e){
+            let valor = e.target.value;
+            if (valor == "S"){
+                if (haySalida){
+                    alert("Ya hay una salida al laberinto");
+                    e.target.value="P";
+                    valor = "P";
+                } else {
+                    haySalida = true;
+                }
+            } else {
+                if (seleccionoSalida){
+                    haySalida = false;
+                }
+            }
+
+            
+            for(let r=0; r<opcionesPosibles.length; r++){
+                e.target.classList.remove(opcionesPosibles[r]);
+            }
+            e.target.classList.add(valor);
+            actualizarResultado();
+        }
+        function primerRender(){
+            let allSelects = document.querySelectorAll("#opcionesLaberinto select");
+            for (let s = 0; s<allSelects.length; s++){
+                allSelects[s].classList.add(allSelects[s].value);
+            }
+            actualizarResultado()
+        }
+        function actualizarResultado(){
+            let trackRecuento = {
+                P:0,
+                E:0,
+                S:0,
+                C:0,
+            };
+            let elemCodGen = document.getElementById("codigoGenerado");
+            let elementosSelect = document.querySelectorAll("#opcionesLaberinto select");
+            let listaOpcionesClase = [];
+            for (let e = 0; e< elementosSelect.length; e++){
+                listaOpcionesClase.push(elementosSelect[e].value);
+                trackRecuento[elementosSelect[e].value]++;
+            }
+            ultimoCodigoGenerado = "";
+            for(let l = 0; l<listaOpcionesClase.length; l++){
+                let opcion = listaOpcionesClase[l];
+                let alias;
+                switch (opcion) {
+                    case "P":
+                        alias = "pared";
+                        break;
+                    case "C":
+                        alias = "camino";
+                        break;
+                    case "E":
+                        alias = "entrada";
+                        break;
+                    case "S":
+                        alias = "salida";
+                        break;
+                }
+                ultimoCodigoGenerado += "<div class='"+alias+"'></div>\n";
+            }
+            elemCodGen.innerText = ultimoCodigoGenerado;
+            elemCodGen.value = ultimoCodigoGenerado;
+            document.querySelectorAll('code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+            document.getElementById("re").innerHTML = trackRecuento.E;
+            document.getElementById("rs").innerHTML = trackRecuento.S;
+            document.getElementById("rp").innerHTML = trackRecuento.P;
+            document.getElementById("rc").innerHTML = trackRecuento.C;
+        }
+        let pared1 = document.querySelector("#opcionesLaberinto div:first-child div:nth-child(1)");
+        let entrada = document.querySelector("#opcionesLaberinto div:first-child div:nth-child(2)");
+        let pared2 = document.querySelector("#opcionesLaberinto div:first-child div:nth-child(3)");
+
+        pared1.querySelector("select").value="P";
+        pared1.querySelector("select").disabled = true;
+        entrada.querySelector("select").value="E";
+        entrada.querySelector("select").disabled = true;
+        pared2.querySelector("select").value="P";
+        pared2.querySelector("select").disabled = true;
+
+        primerRender();
+
+        function copiarCodigo() {
+            const el = document.createElement('textarea');
+            el.value = ultimoCodigoGenerado;
+            document.body.appendChild(el);
+            el.select();
+            el.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            document.getElementById("mensajeCopia").classList.add("oculto");
+            setTimeout(() => {
+                document.getElementById("mensajeCopia").classList.remove("oculto");
+            }, 1150);
+        }
+
+    </script>
+</body>
+</html>
